@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteConverter", "SpriteConverter.csproj", "{0B6C5F7E-64CE-4449-A162-F8CA4FCBED3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B6C5F7E-64CE-4449-A162-F8CA4FCBED3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B6C5F7E-64CE-4449-A162-F8CA4FCBED3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B6C5F7E-64CE-4449-A162-F8CA4FCBED3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B6C5F7E-64CE-4449-A162-F8CA4FCBED3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F7EAD13-EB13-45DF-B5C5-FA19321F14E6}
+	EndGlobalSection
+EndGlobal
