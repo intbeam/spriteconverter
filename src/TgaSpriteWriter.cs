@@ -67,7 +67,7 @@ namespace SpriteConverter
                 ImageWidth = (ushort)source.Width, 
                 ImageHeight = (ushort)source.Height, 
                 // bits per pixel in the image data. Since we're using a 8 bit palette, this needs to be 8 as well
-                BitsPerPrixel = 8, 
+                BitsPerPixel = 8, 
                 // TGA (and BMP) defaults to bottom to top scanline ordering, we want it from top to bottom
                 ImageDescriptor = (byte)(ImageDescriptor.ImageOriginTopBottom)
             };
@@ -133,7 +133,7 @@ namespace SpriteConverter
         /// <returns></returns>
         private byte[] CreateImageData(Bitmap source, TgaHeader header)
         {
-            int imageSize = header.ImageWidth * header.ImageHeight * (header.BitsPerPrixel / 8);
+            int imageSize = header.ImageWidth * header.ImageHeight * (header.BitsPerPixel / 8);
             byte[] imageData = new byte[imageSize];
             // Go through each scanline
             for (int y = 0; y < header.ImageHeight; y++)
@@ -195,7 +195,7 @@ namespace SpriteConverter
             writer.Write(header.OriginY);
             writer.Write(header.ImageWidth);
             writer.Write(header.ImageHeight);
-            writer.Write(header.BitsPerPrixel);
+            writer.Write(header.BitsPerPixel);
             writer.Write(header.ImageDescriptor);
         }
 
@@ -265,7 +265,7 @@ namespace SpriteConverter
             /// <summary>
             /// Bits per pixel (8 for indexed)
             /// </summary>
-            public byte BitsPerPrixel;
+            public byte BitsPerPixel;
             /// <summary>
             /// 
             /// </summary>

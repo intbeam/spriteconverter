@@ -74,9 +74,11 @@ namespace SpriteConverter
             {
                 try
                 {
+                    // Get info for file so we can use this information the the out format
                     var fileInfo = new FileInfo(file);
+                    // we will select a formatwriter based on extension
                     IFormatWriter? format = null;
-
+                    // format outfile
                     var outFile = string.Format(config["outfile"], Path.GetFileNameWithoutExtension(fileInfo.Name), fileInfo.Extension, fileInfo.DirectoryName);
 
                     var outFileInfo = new FileInfo(outFile);

@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteConverter", "src\SpriteConverter.csproj", "{53C079AE-78D0-484A-BE1A-9A802F15D3DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteConverter.Tests", "..\SpriteConverter.Tests\SpriteConverter.Tests.csproj", "{83F18BFF-6811-4227-A095-449301E43D7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteConverter.Tests", "tests\SpriteConverter.Tests.csproj", "{77C7BEC1-5656-4206-AF1B-07274B17B331}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{53C079AE-78D0-484A-BE1A-9A802F15D3DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53C079AE-78D0-484A-BE1A-9A802F15D3DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53C079AE-78D0-484A-BE1A-9A802F15D3DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83F18BFF-6811-4227-A095-449301E43D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83F18BFF-6811-4227-A095-449301E43D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83F18BFF-6811-4227-A095-449301E43D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83F18BFF-6811-4227-A095-449301E43D7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77C7BEC1-5656-4206-AF1B-07274B17B331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C7BEC1-5656-4206-AF1B-07274B17B331}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77C7BEC1-5656-4206-AF1B-07274B17B331}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77C7BEC1-5656-4206-AF1B-07274B17B331}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
