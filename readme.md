@@ -2,9 +2,21 @@
 
 This project's intent is to be a very simple way to convert images to sprite sheets using predefined palettes to a file format that is less CPU intensive than more modern formates such as PNG or WebM.
 
+Although it has not been tested yet, this program should theoretically be cross-platform.
+
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
+
+## Requirements
+
+- [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
+
+## How to build
+
+```sh
+dotnet build ./SpriteConverter.sln
+```
 
 ## Usage
 ```sh
