@@ -78,6 +78,9 @@ namespace SpriteConverter
                 {
                     // Get info for file so we can use this information the the out format
                     var fileInfo = new FileInfo(file);
+
+                    if (!fileInfo.Exists)
+                        throw new FileNotFoundException("Could not find source file", file);
                     // we will select a formatwriter based on extension
                     IFormatWriter? format = null;
                     // format outfile
@@ -91,8 +94,6 @@ namespace SpriteConverter
                     if("auto".Equals(config["format"], StringComparison.OrdinalIgnoreCase))
                     {
                         // detect based on file extension
-                        // Yes this looks silly right now, and totally unnecessary
-                        // But it might make sense in the future, when someone drags their putrid internet-laden corpse around and goes "hey I need ico support and not all of them should be ico"
                         if (new[] { ".tga", ".icb", ".vda", ".vst" }.Any(n => n.Equals(outFileInfo.Extension, StringComparison.OrdinalIgnoreCase)))
                             formatName = "tga";
                     }
@@ -127,7 +128,7 @@ namespace SpriteConverter
                 }
                 catch(FileNotFoundException ex)
                 {
-                    Console.WriteLine($"The file {ex.FileName} could not be found");
+                    Console.WriteLine($"The file \"{ex.FileName}\" could not be found");
                 }
                 catch(DirectoryNotFoundException)
                 {
@@ -141,6 +142,7 @@ namespace SpriteConverter
                 catch(OutOfMemoryException ex)
                 {
                     Console.WriteLine("The system ran out of memory : " + ex.Message);
+                    break;
                 }
             }
 
