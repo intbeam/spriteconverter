@@ -79,6 +79,7 @@ namespace SpriteConverter
 
         // Some known palettes stored in the dictionary
         public const string PaletteRgb685 = "Rgb685";
+        public const string PaletteRgb666 = "Rgb666";
         public const string PaletteRgb565 = "Rgb565";
         public const string PaletteRgb232 = "Rgb232";
         public const string PaletteEga = "ega";
@@ -89,7 +90,8 @@ namespace SpriteConverter
         private Dictionary<string, (int,int,int)> rgbPalettes = new Dictionary<string, (int,int,int)>(System.StringComparer.OrdinalIgnoreCase) {
             ["Rgb565"] = (5, 6, 5), // 150 color palette
             ["Rgb685"] = (6, 8, 5), // 240 color palette
-            ["Rgb232"] = (2, 3, 2)  // 12 color palette
+            ["Rgb232"] = (2, 3, 2),  // 12 color palette
+            ["Rgb666"] = (6, 6, 6) // 216 color palette
         };
 
         /// <summary>
