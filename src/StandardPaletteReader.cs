@@ -29,6 +29,17 @@ namespace SpriteConverter
         /// <returns></returns>
         protected virtual Palette CreateRgbPalette(int rResolution, int gResolution, int bResolution)
         {
+            if (rResolution <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(rResolution), "Must be greater than 0");
+
+
+            if (gResolution <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(gResolution), "Must be greater than 0");
+
+
+            if (rResolution <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(bResolution), "Must be greater than 0");
+
             var grayshades = 6;
             var colors = rResolution * gResolution * bResolution;
             var palette = new PaletteEntry[colors + (grayshades + 1)];
@@ -75,7 +86,7 @@ namespace SpriteConverter
         /// <summary>
         /// Known combinations
         /// </summary>
-        private Dictionary<string, (int,int,int)> rgbPalettes = new Dictionary<string, (int,int,int)> {
+        private Dictionary<string, (int,int,int)> rgbPalettes = new Dictionary<string, (int,int,int)>(System.StringComparer.OrdinalIgnoreCase) {
             ["Rgb565"] = (5, 6, 5), // 150 color palette
             ["Rgb685"] = (6, 8, 5), // 240 color palette
             ["Rgb232"] = (2, 3, 2)  // 12 color palette
@@ -98,7 +109,10 @@ namespace SpriteConverter
 
         public Palette GetPalette(string name)
         {
-            if(name == "ega")
+            if (name == null)
+                throw new System.ArgumentNullException(nameof(name));
+
+            if(name.Equals("ega", System.StringComparison.OrdinalIgnoreCase))
             {
                 return CreateEgaPalette();
             }

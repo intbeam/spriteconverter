@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Extensions.Configuration.CommandLine;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpriteConverter
 {
@@ -32,7 +33,8 @@ namespace SpriteConverter
                     ["outfile"] = "{0}.tga",    // format of output file
                     ["colormapper"] = "rgb",    // what color mapping strategy to be used. Default RGB
                     ["filename"] = "",    // if input filename is null, the standard input stream will be read
-                    ["writepalette"] = "true" // setting this to false will prevent it from being opened in normal applications
+                    ["omitpalette"] = "false", // setting this to false will prevent it from being opened in normal applications
+                    ["format"] = "auto"
                 })
                 .AddJsonFile("SpriteConverter.json", true, false)
                 .AddCommandLine(args, new Dictionary<string, string>
@@ -41,7 +43,8 @@ namespace SpriteConverter
                     ["--outfile"] = "outfile",
                     ["--colormapper"] = "colormapper",
                     ["--filename"] = "filename",
-                    ["--writepalette"] = "writepalette"
+                    ["--omitpalette"] = "omitpalette",
+                    ["--format"] = "format"
                 }
                 );
 
@@ -55,14 +58,13 @@ namespace SpriteConverter
 
             if(string.IsNullOrWhiteSpace(config["filename"]))
             {
-                using (var stream = System.Console.OpenStandardInput())
-                using(var streamReader = new System.IO.StreamReader(stream, System.Console.InputEncoding))
+                using var stream = System.Console.OpenStandardInput();
+                using var streamReader = new System.IO.StreamReader(stream, System.Console.InputEncoding);
+
+                string? line;
+                while((line = streamReader.ReadLine()) != null)
                 {
-                    string? line;
-                    while((line = streamReader.ReadLine()) != null)
-                    {
-                        files.Add(line);
-                    }
+                    files.Add(line);
                 }
             }
             else
@@ -83,9 +85,25 @@ namespace SpriteConverter
 
                     var outFileInfo = new FileInfo(outFile);
 
-                    if (outFileInfo.Extension.Equals(".tga", System.StringComparison.OrdinalIgnoreCase))
+                    var formatName = "tga";
+
+                    // Replace with factory when needed
+                    if("auto".Equals(config["format"], StringComparison.OrdinalIgnoreCase))
                     {
-                        format = new TgaSpriteWriter(paletteApproximator, new TgaSpriteWriterOptions { WritePalette = "true".Equals(config["writepalette"], System.StringComparison.OrdinalIgnoreCase) });
+                        // detect based on file extension
+                        // Yes this looks silly right now, and totally unnecessary
+                        // But it might make sense in the future, when someone drags their putrid internet-laden corpse around and goes "hey I need ico support and not all of them should be ico"
+                        if (new[] { ".tga", ".icb", ".vda", ".vst" }.Any(n => n.Equals(outFileInfo.Extension, StringComparison.OrdinalIgnoreCase)))
+                            formatName = "tga";
+                    }
+                    else
+                    {
+                        formatName = config["format"];
+                    }
+
+                    if(formatName == "tga")
+                    { 
+                        format = new TgaSpriteWriter(paletteApproximator, new TgaSpriteWriterOptions { WritePalette = "false".Equals(config["omitpalette"], System.StringComparison.OrdinalIgnoreCase) });
                     }
                     else
                     {
