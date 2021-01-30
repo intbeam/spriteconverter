@@ -14,5 +14,7 @@ namespace SpriteConverter
     public sealed class TgaSpriteWriterOptions
     {
         public bool WritePalette { get; set; } = true;
+        public bool RleEncode { get; set; } = false;
+        public int RleWindowSize { get; set; } = 0;
     }
 }

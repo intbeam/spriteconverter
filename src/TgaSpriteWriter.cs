@@ -13,6 +13,7 @@ using System;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace SpriteConverter
 {
@@ -21,16 +22,20 @@ namespace SpriteConverter
         private readonly IPaletteApproximator paletteApproximator;
         private readonly TgaSpriteWriterOptions options;
         private const string TgaSignature = "TRUEVISION-XFILE.\0";
+        private const int MaxRlePacketSize = 127;
+        private const int MinRepetition = 2;
+        private readonly IRleEncoder? rleEncoder;
 
         /// <summary>
         /// Creates a new Targa Sprite Writer
         /// </summary>
         /// <param name="paletteApproximator">The type of approximation to use in order to find closest colors</param>
         /// <param name="options">Write options</param>
-        public TgaSpriteWriter(IPaletteApproximator paletteApproximator, TgaSpriteWriterOptions? options = default)
+        public TgaSpriteWriter(IPaletteApproximator paletteApproximator, TgaSpriteWriterOptions? options = default, IRleEncoder? rleEncoder = default)
         {
             this.options = options ?? new TgaSpriteWriterOptions();
             this.paletteApproximator = paletteApproximator;
+            this.rleEncoder = rleEncoder;
         }
 
         public Task Save(Image sourceImage, Stream output, SpriteMetadata metadata)
@@ -44,6 +49,11 @@ namespace SpriteConverter
                 throw new ArgumentNullException(nameof(metadata.Palette), "Palette cannot be null if WritePalette is enabled");
             }
 
+            if(options.RleEncode && rleEncoder == null)
+            {
+                throw new ArgumentException("Rle not supported in this configuration");
+            }
+
             var header = new TgaHeader
             {
                 // ImageId can put some sort of indentifier on the image..
@@ -54,7 +64,7 @@ namespace SpriteConverter
                 // If we're writing the palette, set it to indexed, otherwise nay
                 ColorMapType = options.WritePalette ? ColorMapType.Indexed : ColorMapType.None, 
                 // we will only be working with indexed palettes.. or will we?
-                ImageType = ImageType.Indexed, 
+                ImageType = options.RleEncode ? ImageType.RleIndexed : ImageType.Indexed, 
                 // this is an offset if we we're only using colors after a certain index
                 ColorMapFirstIndex = 0, 
                 ColorMapLength = options.WritePalette ? (ushort)metadata.Palette.Count: ushort.MinValue, // number of colors in the palette
@@ -145,10 +155,10 @@ namespace SpriteConverter
                     var c = source.GetPixel(x, y);
                     int index;
 
-                    // if alpha channel is zero, set it to 255 (let's revise this later)
+                    // if alpha channel is zero, set it to 0 (let's revise this later)
                     if (c.A == 0)
                     {
-                        index = 255;
+                        index = 0;
                     }
                     else
                     {
@@ -170,7 +180,42 @@ namespace SpriteConverter
 
         private void WriteImageData(BinaryWriter writer, byte[] imageData)
         {
-            writer.Write(imageData);
+            if (this.options.RleEncode)
+            {
+                if (rleEncoder == null)
+                    throw new InvalidOperationException("Rle encoder not set");
+
+                var result = rleEncoder.RleEncode<byte>(imageData, options.RleWindowSize, MinRepetition, MaxRlePacketSize).ToList();
+                
+
+
+                if (result.Sum(n => n.Count) != imageData.Length)
+                {
+                    throw new InvalidOperationException("Encoded data corrupted");
+                }
+                
+
+                foreach(var item in result)
+                {
+                    if (item is GeneralPacket<byte> gp)
+                    {
+                        byte packetHeader = (byte)(gp.Count - 1);
+                        writer.Write(packetHeader);
+                        writer.Write(item.GetContent().ToArray());
+                    }
+                    else if(item is RlePacket<byte> rp)
+                    {
+                        byte packetHeader = (byte)(0b10000000 | (rp.Count - 1));
+                        writer.Write(packetHeader);
+                        writer.Write(rp.Item);
+                    }
+                }
+
+            }
+            else
+            {
+                writer.Write(imageData);
+            }
         }
 
         private void WriteFooter(BinaryWriter writer)

@@ -34,7 +34,9 @@ namespace SpriteConverter
                     ["colormapper"] = "rgb",    // what color mapping strategy to be used. Default RGB
                     ["filename"] = "",    // if input filename is null, the standard input stream will be read
                     ["omitpalette"] = "false", // setting this to false will prevent it from being opened in normal applications
-                    ["format"] = "auto"
+                    ["format"] = "auto",
+                    ["rle"] = "true",
+                    ["rlewindow"] = "0"
                 })
                 .AddJsonFile("SpriteConverter.json", true, false)
                 .AddCommandLine(args, new Dictionary<string, string>
@@ -44,7 +46,9 @@ namespace SpriteConverter
                     ["--colormapper"] = "colormapper",
                     ["--filename"] = "filename",
                     ["--omitpalette"] = "omitpalette",
-                    ["--format"] = "format"
+                    ["--format"] = "format",
+                    ["--rle"] = "rle",
+                    ["--rlewindow"] = "rlewindow"
                 }
                 );
 
@@ -103,8 +107,18 @@ namespace SpriteConverter
                     }
 
                     if(formatName == "tga")
-                    { 
-                        format = new TgaSpriteWriter(paletteApproximator, new TgaSpriteWriterOptions { WritePalette = "false".Equals(config["omitpalette"], System.StringComparison.OrdinalIgnoreCase) });
+                    {
+                        if (!int.TryParse(config["rlewindow"], out int rleWindowSize))
+                            throw new FormatException("RleWindow must be a number");
+
+                        var tgaSpriteWriterOptions = new TgaSpriteWriterOptions
+                        {
+                            WritePalette = "false".Equals(config["omitpalette"], System.StringComparison.OrdinalIgnoreCase),
+                            RleEncode = "true".Equals(config["rle"], StringComparison.OrdinalIgnoreCase),
+                            RleWindowSize = rleWindowSize
+                        };
+
+                        format = new TgaSpriteWriter(paletteApproximator, tgaSpriteWriterOptions, new RleEncoder());
                     }
                     else
                     {
