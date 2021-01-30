@@ -20,7 +20,7 @@ dotnet build ./SpriteConverter.sln
 
 ## Usage
 ```sh
-	dotnet ./spriteconverter.exe [--filename source] [--palette palettename] [--outfile format] [--colormapper mapper] [--omitpalette true/false]
+	dotnet ./spriteconverter.exe [--filename source] [--palette palettename] [--outfile format] [--colormapper mapper] [--omitpalette true/false] [--rle true/false] [--rlewindow n]
 ```
 
 Also accepts a list of filenames (line separated) via stdin
@@ -55,10 +55,17 @@ Name of the color mapper. Defaults to `rgb`. This uses a linear approximation in
 
 Whether the palette should be omitted from the output. Default is `false`. Setting this to `true` will prevent the image from being loaded in normal applications, but can be useful for saving space.
 
+#### --rle
+
+Enabling this option will compress the image using run-length encoding
+
+#### --rlewindow
+
+This is a positive integer which will segment the imagine for compression so that segment will be a specific size. For example if you have 16x16 sprites, it might make sense to have sums of RLE packets of 16 pixels to avoid wrapping packets
+
 ## Future improvements
 
 - Support for more file types (bmp, ico, gif)
-- Run-length encoding
 - A more perceptually accurate colormapper; LAB/HSV plus sRGB ICC profile.. Or maybe even with an ICC profile for IBM 5151/5153? If that exists?)
 - Dithering
 - Performance improvements
