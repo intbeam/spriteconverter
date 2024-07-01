@@ -9,15 +9,9 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-using System.Collections.Generic;
-
 namespace SpriteConverter;
 
-
-public interface IRlePacket<out T>
+public interface IRgbConvert<out TSelf> where TSelf : IRgbConvert<TSelf>
 {
-    public abstract int Count { get; }
-
-    public abstract IEnumerable<T> GetContent();
-
+    static abstract TSelf FromRgb(Rgb color);
 }

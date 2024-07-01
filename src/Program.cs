@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Intbeam
+﻿/* Copyright 2024 Intbeam
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
 and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -10,30 +10,30 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 */
 
 using System;
-using System.Collections;
 using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.Extensions.Configuration.CommandLine;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SpriteConverter
 {
-    class Program
+    [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
+    public static class Program
     {
-        static void Main(string[] args)
+        public static int Main(string[] args)
         {
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder
-                .AddInMemoryCollection(new Dictionary<string, string>
+                .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["palette"] = StandardPaletteReader.PaletteRgb685,  // The palette to use
                     ["outfile"] = "{0}.tga",    // format of output file
                     ["colormapper"] = "rgb",    // what color mapping strategy to be used. Default RGB
                     ["filename"] = "",    // if input filename is null, the standard input stream will be read
                     ["omitpalette"] = "false", // setting this to false will prevent it from being opened in normal applications
+                    ["dithering"] = "none", // whether to enable dithering
                     ["format"] = "auto",
                     ["rle"] = "true",
                     ["rlewindow"] = "0"
@@ -46,6 +46,7 @@ namespace SpriteConverter
                     ["--colormapper"] = "colormapper",
                     ["--filename"] = "filename",
                     ["--omitpalette"] = "omitpalette",
+                    ["--dithering"] = "dithering",
                     ["--format"] = "format",
                     ["--rle"] = "rle",
                     ["--rlewindow"] = "rlewindow"
@@ -55,25 +56,39 @@ namespace SpriteConverter
             var config = configurationBuilder.Build();
 
             var paletteGenerator = new StandardPaletteReader();
-            var palette = paletteGenerator.GetPalette(config["palette"]);
-            var paletteApproximator = new PaletteRgbApproximator(palette);
+            var palette = paletteGenerator.GetPalette(config["palette"] ?? StandardPaletteReader.PaletteRgb685);
+            IPaletteApproximator paletteApproximator;
 
-            List<string> files = new List<string>();
+            if (config["colormapper"] == "hsl")
+            {
+                paletteApproximator = new HslApproximator(palette);
+            }
+            else if (config["colormapper"] == "lab")
+            {
+                paletteApproximator = new LabApproximator(palette);
+            }
+            else
+            {
+                paletteApproximator = new PaletteRgbApproximator(palette);
+            }
 
-            if(string.IsNullOrWhiteSpace(config["filename"]))
+            List<string> files = [];
+            
+            var filename = config["filename"];
+
+            if(string.IsNullOrWhiteSpace(filename))
             {
                 using var stream = System.Console.OpenStandardInput();
                 using var streamReader = new System.IO.StreamReader(stream, System.Console.InputEncoding);
 
-                string? line;
-                while((line = streamReader.ReadLine()) != null)
+                while(streamReader.ReadLine() is { } line)
                 {
                     files.Add(line);
                 }
             }
             else
             {
-                files.Add(config["filename"]);
+                files.Add(filename);
             }
             
             foreach(var file in files)
@@ -85,10 +100,10 @@ namespace SpriteConverter
 
                     if (!fileInfo.Exists)
                         throw new FileNotFoundException("Could not find source file", file);
-                    // we will select a formatwriter based on extension
+                    // we will select a IFormatWriter based on extension
                     IFormatWriter? format = null;
                     // format outfile
-                    var outFile = string.Format(config["outfile"], Path.GetFileNameWithoutExtension(fileInfo.Name), fileInfo.Extension, fileInfo.DirectoryName);
+                    var outFile = string.Format(config["outfile"] ?? "outfile", Path.GetFileNameWithoutExtension(fileInfo.Name), fileInfo.Extension, fileInfo.DirectoryName);
 
                     var outFileInfo = new FileInfo(outFile);
 
@@ -115,14 +130,15 @@ namespace SpriteConverter
                         {
                             WritePalette = "false".Equals(config["omitpalette"], System.StringComparison.OrdinalIgnoreCase),
                             RleEncode = "true".Equals(config["rle"], StringComparison.OrdinalIgnoreCase),
-                            RleWindowSize = rleWindowSize
+                            RleWindowSize = rleWindowSize,
+                            Dithering = "enabled".Equals(config["dithering"], StringComparison.OrdinalIgnoreCase)
                         };
 
                         format = new TgaSpriteWriter(paletteApproximator, tgaSpriteWriterOptions, new RleEncoder());
                     }
                     else
                     {
-                        throw new System.NotImplementedException($"Extension {fileInfo.Extension} is not supported");
+                        throw new NotImplementedException($"Extension {fileInfo.Extension} is not supported");
                     }
 
                     Console.Write($"Writing {outFileInfo.Name}...");
@@ -159,6 +175,8 @@ namespace SpriteConverter
                     break;
                 }
             }
+
+            return 0;
 
         }
     }

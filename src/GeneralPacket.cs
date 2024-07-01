@@ -1,11 +1,22 @@
-﻿using System.Collections.Generic;
+﻿/* Copyright 2024 Intbeam
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SpriteConverter
 {
-    public struct GeneralPacket<T> : IRlePacket<T>
+    public readonly struct GeneralPacket<T> : IRlePacket<T>
     {
-        private readonly T[] content;
+        private readonly T[] _content;
 
         public GeneralPacket(T[] input)
         {
@@ -15,14 +26,14 @@ namespace SpriteConverter
             if (input.Length == 0)
                 throw new System.ArgumentException("Must have at least one element", nameof(input));
 
-            content = input;
+            _content = input;
         }
 
         public GeneralPacket(IEnumerable<T> input) : this(input.ToArray())
         {
         }
 
-        public int Count => content.Length;
+        public int Count => _content.Length;
 
 
         public override string ToString()
@@ -32,12 +43,12 @@ namespace SpriteConverter
             sb = sb.Append("g[\"");
             if (typeof(T) == typeof(byte))
             {
-                var str = string.Join(" ", content.Cast<byte>().Select(n => n.ToString("X2")));
+                var str = string.Join(" ", _content.Cast<byte>().Select(n => n.ToString("X2")));
                 sb.Append(str);
             }
             else
             {
-                foreach (var item in content)
+                foreach (var item in _content)
                 {
                     if (item is byte b)
                     {
@@ -54,7 +65,7 @@ namespace SpriteConverter
 
         public IEnumerable<T> GetContent()
         {
-            return content;
+            return _content;
         }
     }
 }

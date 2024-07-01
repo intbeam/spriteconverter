@@ -9,21 +9,18 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace SpriteConverter
+namespace SpriteConverter;
+/// <summary>
+/// Attempts to approximate a color in a palette
+/// </summary>
+public interface IPaletteApproximator
 {
     /// <summary>
-    /// Attempts to approximate a color in a palette
+    /// Gets the index for the color that is the closest approximation to the color provided
     /// </summary>
-    public interface IPaletteApproximator
-    {
-        /// <summary>
-        /// Gets the index for the color that is the closest approximation to the color provided
-        /// </summary>
-        /// <param name="r">Red color between 0 and 1</param>
-        /// <param name="g">Green color between 0 and 1</param>
-        /// <param name="b">Blue color between 0 and 1</param>
-        /// <returns>Index in the palette for the approximate color</returns>
-        public int FindNearestColor(float r, float g, float b);
-    }
-
+    /// <param name="color">Input color to find in palette</param>
+    /// <param name="error">The error difference in the two pixels</param>
+    /// <returns>Index in the palette for the approximate color</returns>
+    public int FindNearestColor(Rgb color, out Rgb error);
 }
+

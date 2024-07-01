@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SpriteConverter": {
+      "commandName": "Project",
+      "commandLineArgs": "--filename test.png -rle true --rlewindow 0"
+    }
+  }
+}

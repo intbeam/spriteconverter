@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Intbeam
+﻿/* Copyright 2024 Intbeam
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
 and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -9,18 +9,17 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-namespace SpriteConverter
+namespace SpriteConverter;
+/// <summary>
+/// Generates palettes according to a descriptive name
+/// </summary>
+public interface IPaletteReader
 {
     /// <summary>
-    /// Generates palettes according to a descriptive name
+    /// Creates a palette described by the name parameter
     /// </summary>
-    public interface IPaletteReader
-    {
-        /// <summary>
-        /// Creates a palette described by the name parameter
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        Palette GetPalette(string name);
-    }
+    /// <param name="name"></param>
+    /// <returns></returns>
+    Palette GetPalette(string name);
 }
+

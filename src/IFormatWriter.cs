@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Intbeam
+﻿/* Copyright 2024 Intbeam
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
 and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -13,13 +13,11 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.IO;
 
-namespace SpriteConverter
+namespace SpriteConverter;
+/// <summary>
+/// Converts an image to the appropriate format
+/// </summary>
+public interface IFormatWriter
 {
-    /// <summary>
-    /// Converts an image to the appropriate format
-    /// </summary>
-    public interface IFormatWriter
-    {
-        Task Save(Image bitmap, Stream output, SpriteMetadata metadata);
-    }
+    Task Save(Image bitmap, Stream output, SpriteMetadata metadata);
 }

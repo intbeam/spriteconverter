@@ -1,4 +1,4 @@
-﻿/* Copyright 2021 Intbeam
+﻿/* Copyright 2024 Intbeam
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
 and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -10,13 +10,18 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SpriteConverter
 {
+    [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
     public sealed class TgaSpriteWriter : IFormatWriter
     {
         private readonly IPaletteApproximator paletteApproximator;
@@ -135,42 +140,88 @@ namespace SpriteConverter
             return paletteData;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct Bgra
+        {
+            public byte Blue { get; set; }
+            public byte Green { get; set; }
+            public byte Red { get; set; }
+            public byte Alpha { get; set; }
+
+            public void AddError( Rgb error, float quant)
+            {
+                Red = (byte)(int.Clamp(Red + (int)(error.Red * 255f * quant / 16f), 0, 255));
+                Green = (byte)(int.Clamp(Green + (int)(error.Green * 255f * quant / 16f), 0, 255));
+                Blue = (byte)(int.Clamp(Blue + (int)(error.Blue * 255f * quant / 16f), 0, 255));
+            }
+        }
+
         /// <summary>
         /// Creates an array containing the actual image data
         /// </summary>
         /// <param name="source"></param>
         /// <param name="header"></param>
         /// <returns></returns>
-        private byte[] CreateImageData(Bitmap source, TgaHeader header)
+        private unsafe byte[] CreateImageData(Bitmap source, TgaHeader header)
         {
             int imageSize = header.ImageWidth * header.ImageHeight * (header.BitsPerPixel / 8);
             byte[] imageData = new byte[imageSize];
+            var originalImageData = new Color[header.ImageWidth, header.ImageHeight];
+            GraphicsUnit unit = GraphicsUnit.Pixel;
+
+            var sourceBits = source.LockBits(
+                Rectangle.Round(
+                    source.GetBounds(ref unit)), 
+                ImageLockMode.ReadOnly,
+                     PixelFormat.Format32bppArgb);
+            int scanLinesRendered = 0;
+            object lockobj = new object();
+            
+            var posX = Console.CursorLeft;
+            var posY = Console.CursorTop;
+            var begin = (Bgra*)sourceBits.Scan0;
+            var c = begin;
+
             // Go through each scanline
-            for (int y = 0; y < header.ImageHeight; y++)
+            for(var y = 0; y < header.ImageHeight; y++)
             {
                 // Go through each column
                 for (int x = 0; x < header.ImageWidth; x++)
                 {
                     // Get the color at coordinate
-                    var c = source.GetPixel(x, y);
-                    int index;
+                    var index = paletteApproximator.FindNearestColor(new Rgb(c->Red, c->Green , c->Blue), out var error);
 
-                    // if alpha channel is zero, set it to 0 (let's revise this later)
-                    if (c.A == 0)
+                    if (options.Dithering && y < header.ImageHeight - 1)
                     {
-                        index = 0;
+                        Pixel(begin, x + 1, y, header.ImageWidth)->AddError(error, 7f);
+                        Pixel(begin, x - 1, y + 1, header.ImageWidth)->AddError(error, 3f);
+                        Pixel(begin, x, y + 1, header.ImageWidth)->AddError(error, 5);
+                        Pixel(begin, x + 1, y + 1, header.ImageWidth)->AddError(error, 1f);
                     }
-                    else
-                    {
-                        // Get the index for the closest color in the palette
-                        index = paletteApproximator.FindNearestColor(c.R / 255f, c.G / 255f, c.B / 255f);
-                    }
+
+
+
                     // Set the data in the byte array to the value
                     imageData[y * header.ImageWidth + x] = (byte)index;
+                    c++;
                 }
+
+                lock (lockobj)
+                {
+                    scanLinesRendered++;
+                }
+
+                Console.CursorLeft = posX;
+                Console.CursorTop = posY;
+                Console.Write($"{Math.Round(scanLinesRendered / (float)header.ImageHeight * 100f, 2).ToString("F2", CultureInfo.InvariantCulture)}% ({scanLinesRendered} / {header.ImageHeight})");
             }
 
             return imageData;
+        }
+
+        private static unsafe Bgra* Pixel(Bgra* start, int x, int y, int imageWidth)
+        {
+            return start + (y * imageWidth) + x;
         }
 
         private void WritePaletteData(BinaryWriter writer, byte[] paletteData)
